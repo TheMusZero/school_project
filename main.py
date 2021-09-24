@@ -4,7 +4,7 @@ from vk_api.utils import get_random_id
 
 from VkBot import VkBot
 from work_with_sql import examination, take_all_users_id
-from wtr import weather, peek_cities
+from wtr import weather, peek_cities, forecast
 
 
 def write_msg(user_id, message):
@@ -19,6 +19,7 @@ autorization = False
 print("Server started")
 users_ids = take_all_users_id()
 wanna_peek_weather = False
+frcst = False
 citis = []
 for event in longpoll.listen():
     if event.type == VkEventType.MESSAGE_NEW:
@@ -53,14 +54,14 @@ for event in longpoll.listen():
                     for i in range(len(a)):
                         b.append(f'{a[i][0]}. {a[i][1]} ({a[i][2]})')
                     b = '\n'.join(b)
-                    write_msg(event.user_id,  f'Какой город вы имели ввиду?\n'
-                                              f'{b}')
+                    write_msg(event.user_id, f'Какой город вы имели ввиду?\n'
+                                             f'{b}')
                     wanna_peek_weather = True
                     citis = a
 
             elif wanna_peek_weather:
                 try:
-                    number = int(event.text)
+                    number = int(event.text) - 1
                 except ValueError:
                     write_msg(event.user_id, 'Кажется вы неправильно ввели запрос, повторите его снова')
                 city = citis[number][-1]
@@ -87,6 +88,48 @@ for event in longpoll.listen():
                                              f'Давление: {a[3]}hPa\n'
                                              f'{precipitation}')
                     wanna_peek_weather = False
+
+            elif event.text.lower().split()[0] == '!forecast':
+                city = event.text.lower().split()[1]
+                a = peek_cities(city)
+                b = []
+                if len(a) > 0:
+                    for i in range(len(a)):
+                        b.append(f'{a[i][0]}. {a[i][1]} ({a[i][2]})')
+                    b = '\n'.join(b)
+                    write_msg(event.user_id, f'Какой город вы имели ввиду?\n'
+                                             f'{b}')
+                    frcst = True
+                    citis = a
+
+            elif frcst:
+                try:
+                    number = int(event.text) - 1
+                except ValueError:
+                    write_msg(event.user_id, 'Кажется вы неправильно ввели запрос, повторите его снова')
+                city_id = citis[number][-1]
+                a = forecast(city_id)
+                for i in range(len(a)):
+                    a[i] = ' '.join(a[i])
+                write_msg(event.user_id, '\n'.join(a))
+                frcst = False
+
+
+            elif wanna_peek_weather:
+                try:
+                    number = int(event.text)
+                except ValueError:
+                    write_msg(event.user_id, 'Кажется вы неправильно ввели запрос, повторите его снова')
+                city = citis[number][-1]
+                a = weather(city)
+                if a == 'bad_query':
+                    write_msg(event.user_id, 'Кажется вы неправильно ввели запрос, повторите его снова')
+                else:
+                    write_msg(event.user_id, f'Температура {a[0]}°C\n'
+                                             f'Влажность: {a[1]}%\n'
+                                             f'Скорость ветра: {a[2]}m/s\n'
+                                             f'Давление: {a[3]}hPa')
+                wanna_peek_weather = False
 
             elif event.text not in user.COMMANDS:
                 write_msg(event.user_id, f'Упс, кажется я не понимаю, что вы говорите...😬\n'
