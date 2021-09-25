@@ -32,3 +32,21 @@ def take_all_users_id():
         users_ids.append(i[0])
 
     return users_ids
+
+
+def new_note(user_id, note):
+    sql = 'SELECT id FROM notebook'
+    note = note
+    try:
+        id = cursor.execute(sql).fetchall()[-1]
+        cursor.execute(f"""INSERT INTO notebook(id, user, note)
+                        VALUES({id[0] + 1}, {user_id}, '{note}')""")
+        conn.commit()
+    except IndexError:
+        cursor.execute(f"""INSERT INTO notebook(id, user, note)
+                                VALUES(1, {user_id}, '{note}')""")
+        conn.commit()
+
+
+def note():
+    return None

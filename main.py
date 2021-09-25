@@ -3,7 +3,7 @@ from vk_api.longpoll import VkLongPoll, VkEventType
 from vk_api.utils import get_random_id
 
 from VkBot import VkBot
-from work_with_sql import examination, take_all_users_id
+from work_with_sql import examination, take_all_users_id, new_note
 from wtr import weather, peek_cities, forecast
 
 
@@ -120,6 +120,8 @@ for event in longpoll.listen():
                     number = int(event.text)
                 except ValueError:
                     write_msg(event.user_id, 'Кажется вы неправильно ввели запрос, повторите его снова')
+                    break
+
                 city = citis[number][-1]
                 a = weather(city)
                 if a == 'bad_query':
@@ -130,6 +132,12 @@ for event in longpoll.listen():
                                              f'Скорость ветра: {a[2]}m/s\n'
                                              f'Давление: {a[3]}hPa')
                 wanna_peek_weather = False
+
+            elif event.text.lower().split()[0] == '!new_note':
+                text = str(' '.join(event.text.split()[1:]))
+                new_note(event.user_id, text)
+                write_msg(event.user_id, "Заметка создана")
+
 
             elif event.text not in user.COMMANDS:
                 write_msg(event.user_id, f'Упс, кажется я не понимаю, что вы говорите...😬\n'

@@ -1,5 +1,2 @@
-a = '123'
-try:
-    print(len(a))
-except TypeError:
-    print('INT')
+a = ['asdasd', 'asdasd', 'asdaq']
+print(a[1:])
