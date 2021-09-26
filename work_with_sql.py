@@ -54,7 +54,6 @@ def count_note(user_id):
         users = []
         for i in range(len(cursor.execute(sql).fetchall())):
             users.append(f'{i + 1}. {cursor.execute(sql).fetchall()[i][0]}')
-        print(users)
         return len(users), users
 
     except IndexError:
