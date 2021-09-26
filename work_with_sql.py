@@ -36,7 +36,6 @@ def take_all_users_id():
 
 def new_note(user_id, note):
     sql = 'SELECT id FROM notebook'
-    note = note
     try:
         id = cursor.execute(sql).fetchall()[-1]
         cursor.execute(f"""INSERT INTO notebook(id, user, note)
@@ -48,5 +47,15 @@ def new_note(user_id, note):
         conn.commit()
 
 
-def note():
-    return None
+def count_note(user_id):
+    sql = f'SELECT note FROM notebook' \
+          f' WHERE user={user_id}'
+    try:
+        users = []
+        for i in range(len(cursor.execute(sql).fetchall())):
+            users.append(f'{i + 1}. {cursor.execute(sql).fetchall()[i][0]}')
+        print(users)
+        return len(users), users
+
+    except IndexError:
+        return 'Error'

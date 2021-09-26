@@ -3,7 +3,7 @@ from vk_api.longpoll import VkLongPoll, VkEventType
 from vk_api.utils import get_random_id
 
 from VkBot import VkBot
-from work_with_sql import examination, take_all_users_id, new_note
+from work_with_sql import examination, take_all_users_id, new_note, count_note
 from wtr import weather, peek_cities, forecast
 
 
@@ -138,6 +138,12 @@ for event in longpoll.listen():
                 new_note(event.user_id, text)
                 write_msg(event.user_id, "Заметка создана")
 
+            elif event.text.lower() == '!check_note':
+                count = count_note(event.user_id)[0]
+                write_msg(event.user_id, f'У вас обнаруженно {count} заметок')
+
+                notes = '\n \n'.join(count_note(event.user_id)[1])
+                write_msg(event.user_id, notes)
 
             elif event.text not in user.COMMANDS:
                 write_msg(event.user_id, f'Упс, кажется я не понимаю, что вы говорите...😬\n'
